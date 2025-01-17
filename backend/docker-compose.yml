@@ -53,7 +53,5 @@ networks:
 volumes:
     backend_mysql_volume:
         driver: local
-    backend_redis_volume:
-        driver: local
     sail-mysql:
         driver: local
