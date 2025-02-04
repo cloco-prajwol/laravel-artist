@@ -18,10 +18,12 @@ use App\Http\Controllers\MusicController;
 |
 */
 
-Route::get('/', function () {
+Route::get('/api', function () {
     return ['Laravel' => app()->version()];
 });
-
+Route::get('/api/test', function () {
+    return ['Laravel' => "hello"];
+});
 
 Route::post('api/login', [AuthController::class, 'login']);
 Route::post('api/register', [UserController::class, 'register']);
@@ -36,7 +38,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('api/artist-create', [ArtistController::class, 'create']);
     Route::put('api/artist-update/{id}', [ArtistController::class, 'update']);
     Route::delete('api/artist-delete/{id}', [ArtistController::class, 'delete']);
-    
+
     Route::get('api/get-music-list/{artist_id}', [MusicController::class, 'index']);
     Route::post('api/music-create', [MusicController::class, 'create']);
     Route::put('api/music-update/{id}', [MusicController::class, 'update']);

@@ -1,0 +1,144 @@
+sudo apt update
+sudo apt install nginx -y
+sudo systemctl start nginx
+sudo systemctl enable nginx
+sudo systemctl status nginx
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+sudo systemctl status docker
+sudo usermod -aG docker $USER
+sudo apt install -y php php-cli php-mbstring php-xml php-bcmath php-curl unzip
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+composer install
+sudo mv composer.phar /usr/local/bin/composer
+git config --global --add safe.directory /var/www/artist
+sudo apt-get install php8.3-gd
+sudo apt-get install php8.3-zip
+composer install
+sudo chown -R $USER:$USER /var/www/artist/
+composer install
+sudo systemctl status docker
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER
+sudo groupadd docker
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo docker-compose up -d
+php artisan migrate
+sudo apt-get install php-mysql
+php artisan config:cache
+php artisan migrate
+sudo ln -s /etc/nginx/sites-available/laravel /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/laravel.conf /etc/nginx/sites-enabled/
+sudo systemctl stop apache2
+sudo systemctl disable apache2
+sudo apt-get remove apache2
+sudo apt-get purge apache2
+sudo apt-get autoremove
+sudo chown -R www-data:www-data /var/www/artist/backend
+sudo chmod -R 775 /var/www/artist/backend/storage
+sudo chmod -R 775 /var/www/artist/backend/bootstrap/cache
+php artisan passport:keys
+sudo php artisan passport:keys
+sudo php artisan passport:client --personal
+sudo apt install php8.3-fpm
+sudo systemctl start php8.3-fpm
+sudo systemctl enable php8.3-fpm
+sudo systemctl restart php8.3-fpm
+sudo tail -f /var/log/nginx/error.log
+sudo vi /etc/nginx/sites-available/laravel.conf
+sudo systemctl restart nginx
+sudo systemctl restart php8.3fpm
+
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name 65.2.6.35;
+    root /var/www/artist/backend/public;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+
+    index index.php;
+
+    charset utf-8;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    error_page 404 /index.php;
+
+    location ~ ^/index\.php(/|$) {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_hide_header X-Powered-By;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name example.com;
+    root /srv/example.com/public;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+
+    index index.php index.html;
+
+    charset utf-8;
+
+    # Serve the static files (Vue.js frontend)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # API routes - Laravel routes
+    location /api {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    # Handle 404 errors with Laravel's default 404 page
+    error_page 404 /index.php;
+
+    # PHP handling for Laravel (index.php)
+    location ~ ^/index\.php(/|$) {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_hide_header X-Powered-By;
+    }
+
+    # Prevent access to hidden files like .env, .git
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+
+    # Allow access to Laravel's /storage and /public
+    location ~ ^/(storage|public)/ {
+        try_files $uri $uri/ =404;
+    }
+}
