@@ -1,6 +1,6 @@
 services:
   mysql:
-    image: mysql:8
+    image: mariadb:10.5
     container_name: mysql-container
     environment:
       MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
@@ -31,7 +31,7 @@ services:
       - app-network
 
   nginx:
-    image: nginx:latest
+    image: nginx:alpine
     container_name: nginx-container
     restart: unless-stopped
     ports:

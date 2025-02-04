@@ -1,38 +1,34 @@
-# use PHP 8.2
-FROM php:8.2-fpm
+# Use PHP 8.2 with Alpine
+FROM php:8.2-fpm-alpine
 
-# Install common php extension dependencies
-RUN apt-get update && apt-get install -y \
-    libfreetype-dev \
-    libjpeg62-turbo-dev \
+# Install dependencies
+RUN apk update && apk add --no-cache \
+    freetype-dev \
+    libjpeg-turbo-dev \
     libpng-dev \
-    zlib1g-dev \
+    zlib-dev \
     libzip-dev \
     unzip \
+    mysql-client \
+    bash \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install zip
+    && docker-php-ext-install gd zip pdo pdo_mysql
 
 # Set the working directory
+WORKDIR /var/www/app
+
+# Copy the application files
 COPY . /var/www/app/
-WORKDIR /var/www/app/
 
-RUN chown -R www-data:www-data /var/www/app/ \
-    && chmod -R 775 /var/www/app/storage
+# Set permissions
+RUN mkdir -p storage bootstrap/cache \
+    && chown -R www-data:www-data /var/www/app \
+    && chmod -R 775 storage bootstrap/cache
 
-RUN mkdir -p /var/www/app/storage /var/www/app/bootstrap/cache \
-    && chown -R www-data:www-data /var/www/app/storage /var/www/app/bootstrap/cache \
-    && chmod -R 775 /var/www/app/storage /var/www/app/bootstrap/cache
-
-RUN docker-php-ext-install pdo pdo_mysql
-RUN apt-get install -y default-mysql-client
-
-# install composer
+# Install Composer dependencies
 COPY --from=composer:2.6.5 /usr/bin/composer /usr/local/bin/composer
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader
 
-# copy composer.json to workdir & install dependencies
-COPY composer.json ./
-RUN composer install
-
-# Set the default command to run php-fpm
+# Start PHP-FPM
 CMD ["php-fpm"]
