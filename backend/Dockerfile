@@ -25,6 +25,9 @@ RUN mkdir -p storage bootstrap/cache \
     && chown -R www-data:www-data /var/www/app \
     && chmod -R 775 storage bootstrap/cache
 
+    # Ensure session storage permissions
+RUN chown -R www-data:www-data /var/www/app/storage/framework/sessions \
+&& chmod -R 775 /var/www/app/storage/framework/sessions
 # Install Composer dependencies
 COPY --from=composer:2.6.5 /usr/bin/composer /usr/local/bin/composer
 COPY composer.json composer.lock ./
